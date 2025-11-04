@@ -98,6 +98,7 @@ class Lexer:
         for token in self.tokens:
             counts_by_type[token.type] = counts_by_type.get(token.type, 0) + 1
 
+        # Add summary counts
         counts_by_type['TOTAL'] = len(self.tokens)
         counts_by_type['INVALID'] = len(self.invalids)
 

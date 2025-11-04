@@ -3,39 +3,53 @@ from .lexer_module import Lexer
 # Helper functions for printing results
 def print_token_stream(tokens):
     print("Token Stream:")
-    for t in tokens:
-        print(f"  [{t.pos}] {t.type:<7}  '{t.lexeme}'")
-    if not tokens:
-        print("  (empty)")
-    print()
+    if tokens:
+        print("  ┌────────────┬───────────────────────────┬─────────────────────┐")
+        print("  │ Position   │ Token Type                │ Lexeme              │")
+        print("  ├────────────┼───────────────────────────┼─────────────────────┤")
+        for t in tokens:
+            print(f"  │ {t.pos:<10} │ {t.type:<25} │ '{t.lexeme}'{(18-len(str(t.lexeme)))*' '}│")
+        print("  └────────────┴───────────────────────────┴─────────────────────┘\n")
+    else:
+        print("  (empty)\n")
 
 # Helper function to print invalid characters
 def print_invalids(invalids):
     print("Invalid Characters:")
-    for pos, char in invalids:
-        print(f"  [{pos}] '{char}'")
-    if not invalids:
-        print("  (none)")
-    print()
+    if invalids:
+        print("  ┌────────────┬─────────────────────┐")
+        print("  │ Position   │ Invalid Character   │")
+        print("  ├────────────┼─────────────────────┤")
+        for pos, char in invalids:
+            print(f"  │ {pos:<10} │ '{char}'{(18-len(str(char)))*' '}│")
+        print("  └────────────┴─────────────────────┘\n")
+    else:
+        print("  (none)\n")
 
 # Helper function to print token counts
 def print_counts(counts):
     print("Token Counts:")
+    print("  ┌───────────────────────────┬─────────┐")
+    print("  │ Token Type                │ Count   │")
+    print("  ├───────────────────────────┼─────────┤")
     for ttype, count in counts.items():
-        print(f"  {ttype:<20} {count}")
-    print(f"  {'TOTAL':<20} {counts['TOTAL']}")
-    print(f"  {'INVALID':<20} {counts['INVALID']}")
-    print()
+        if ttype not in ('TOTAL', 'INVALID'):
+            print(f"  │ {ttype:<25} │ {count:<7} │")
+    print("  ├───────────────────────────┼─────────┤")
+    print(f"  │ {'TOTAL':<25} │ {counts.get('TOTAL', 0):<7} │")
+    print(f"  │ {'INVALID':<25} │ {counts.get('INVALID', 0):<7} │")
+    print("  └───────────────────────────┴─────────┘\n")
 
 # Main program
 if __name__ == "__main__":
     # Example input line
-    line = "x = (3 + 5) * 2;"
+    line = "$x = (3 + 5) * 2;"
+    print(f"Enter a line of code to lex: {line}")
 
     lexer = Lexer(line)
     tokens, invalids, counts = lexer.lex()
 
-    print(f"Input: {line}")
+    print(f"\nInput: {line}\n")
     print_token_stream(tokens)
     print_invalids(invalids)
     print_counts(counts)

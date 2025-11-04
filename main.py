@@ -15,7 +15,7 @@ if __name__ == "__main__":
     lexer = Lexer(line)
     tokens, invalids, counts = lexer.lex()
 
-    print(f"Input: {line}")
+    print(f"\nInput: {line}\n")
     print_token_stream(tokens)
     print_invalids(invalids)
     print_counts(counts)
