@@ -5,7 +5,7 @@
 # python -m lexer.__init__
 
 from lexer.lexer_module import Lexer
-from lexer import print_token_stream, print_invalids, print_counts
+from lexer import lexer_error_handling, print_token_stream, print_invalids, print_counts
 
 # Main program
 if __name__ == "__main__":
@@ -16,6 +16,11 @@ if __name__ == "__main__":
     tokens, invalids, counts = lexer.lex()
 
     print(f"\nInput: {line}\n")
+
+    # Lexical error handling
+    lexer_error_handling(invalids)
+
+    # Print results
     print_token_stream(tokens)
     print_invalids(invalids)
     print_counts(counts)

@@ -1,5 +1,12 @@
 from .lexer_module import Lexer
 
+# Helper function for lexical error handling
+def lexer_error_handling(invalids):
+    if invalids:
+        for pos, char in invalids:
+            print(f"  LexicalError at position {pos}: invalid character '{char}'")
+        print()
+
 # Helper functions for printing results
 def print_token_stream(tokens):
     print("Token Stream:")
@@ -50,6 +57,11 @@ if __name__ == "__main__":
     tokens, invalids, counts = lexer.lex()
 
     print(f"\nInput: {line}\n")
+
+    # Lexical error handling
+    lexer_error_handling(invalids)
+
+    # Print results
     print_token_stream(tokens)
     print_invalids(invalids)
     print_counts(counts)
