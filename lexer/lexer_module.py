@@ -1,7 +1,7 @@
 from .token_module import Token
 import re
 
-TYPE_S = {
+PATTERN = {
     'IDENTIFIER': r'[A-Za-z_][A-Za-z0-9_]*',
     'NUMBER': r'\d+(?:\.\d+)?',
     'SINGLE': {
@@ -13,9 +13,9 @@ TYPE_S = {
 }
 
 # Pre-compile regexes for speed and correctness
-IDENT_RE = re.compile(TYPE_S['IDENTIFIER'])
-NUMBER_RE = re.compile(TYPE_S['NUMBER'])
-SINGLE_RE = {k: re.compile(v) for k, v in TYPE_S['SINGLE'].items()}
+IDENT_RE = re.compile(PATTERN['IDENTIFIER'])
+NUMBER_RE = re.compile(PATTERN['NUMBER'])
+SINGLE_RE = {k: re.compile(v) for k, v in PATTERN['SINGLE'].items()}
 
 class Lexer:
     def __init__(self, source: str):
@@ -83,9 +83,9 @@ class Lexer:
             current_char = self.source[self.position]
 
             # Determine the type of token to scan
-            if re.match(TYPE_S['IDENTIFIER'], current_char):
+            if re.match(PATTERN['IDENTIFIER'], current_char):
                 self.scan_identifier()
-            elif re.match(TYPE_S['NUMBER'], current_char):
+            elif re.match(PATTERN['NUMBER'], current_char):
                 self.scan_number()
             else:
                 # Match against single character token patterns
