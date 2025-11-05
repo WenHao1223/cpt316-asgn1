@@ -83,9 +83,9 @@ class Lexer:
             current_char = self.source[self.position]
 
             # Determine the type of token to scan
-            if re.match(PATTERN['IDENTIFIER'], current_char):
+            if current_char.isalpha() or current_char == '_':
                 self.scan_identifier()
-            elif re.match(PATTERN['NUMBER'], current_char):
+            elif current_char.isdigit():
                 self.scan_number()
             else:
                 # Match against single character token patterns
