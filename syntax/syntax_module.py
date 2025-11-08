@@ -63,20 +63,24 @@ class Syntax:
         return True
 
     # <expression> -> <term> | <expression> + <term> | <expression> - <term>
-    def parse_expression(self) -> bool:
-        if not self.parse_term():
+    def parse_expression(self, in_parenthesis: bool = False) -> bool:
+        if not self.parse_term(in_parenthesis):
             return False
         while self.match('OPERATOR', '+') or self.match('OPERATOR', '-'):
             self.get_next_token()
-            if not self.parse_term():
+            if not self.parse_term(in_parenthesis):
                 return False
         return True
 
     # <term> -> <factor> | <term> * <factor> | <term> / <factor>
-    def parse_term(self) -> bool:
+    def parse_term(self, in_parenthesis: bool = False) -> bool:
         if not self.parse_factor():
             return False
         while self.match('OPERATOR', '*') or self.match('OPERATOR', '/'):
+            if( in_parenthesis and self.current_token and self.current_token.lexeme in ('*', '/') ):
+                print(f"SyntaxError at position {self.current_token.pos}: "
+                    f"expected ')' before '{self.current_token.lexeme}'")
+                return False
             self.get_next_token()
             if not self.parse_factor():
                 return False
@@ -92,7 +96,7 @@ class Syntax:
             return True
         elif self.match('PARENTHESIS', '('):
             self.get_next_token()
-            if not self.parse_expression():
+            if not self.parse_expression(in_parenthesis=True):
                 return False
             if not self.expect('PARENTHESIS', ')'):
                 return False
