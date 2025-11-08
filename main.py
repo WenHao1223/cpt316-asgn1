@@ -12,20 +12,20 @@ from syntax.syntax_module import Syntax
 if __name__ == "__main__":
     # Get input line from user
     # line = str(input("Enter a line of code to lex: "))
-    line = "x = (3 + 5) * 2;"
+    line = "x = (3 + 5 * (2 + 5);"
 
-    # lexer = Lexer(line)
-    # tokens, invalids, counts = lexer.lex()
+    lexer = Lexer(line)
+    tokens, invalids, counts = lexer.lex()
 
     print(f"\nInput: {line}\n")
 
     # # Lexical error handling
-    # lexer_error_handling(invalids)
+    lexer_error_handling(invalids)
 
     # # Print results
-    # print_token_stream(tokens)
-    # print_invalids(invalids)
-    # print_counts(counts)
+    print_token_stream(tokens)
+    print_invalids(invalids)
+    print_counts(counts)
 
-    syntax = Syntax(line)
-    syntax.parse()
+    parser = Syntax(lexer)
+    parser.parse()
