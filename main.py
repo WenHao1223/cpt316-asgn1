@@ -7,12 +7,13 @@
 from lexer.lexer_module import Lexer
 from lexer import lexer_error_handling, print_token_stream, print_invalids, print_counts
 from syntax.syntax_module import Syntax
+# from syntax.node_module import print_tree
 
 # Main program
 if __name__ == "__main__":
     # Get input line from user
     # line = str(input("Enter a line of code to lex: "))
-    line = "x = ( );"
+    line = "x = ((3 + 5) * (2 / 3));"
 
     lexer = Lexer(line)
     tokens, invalids, counts = lexer.lex()
@@ -28,4 +29,5 @@ if __name__ == "__main__":
     # print_counts(counts)
 
     parser = Syntax(lexer)
-    parser.parse()
+    tree = parser.parse()
+    # print_tree(tree)
