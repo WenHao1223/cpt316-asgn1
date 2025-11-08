@@ -1,4 +1,4 @@
-from lexer.lexer_module import Lexer, PATTERN, Token
+from lexer.lexer_module import Lexer, PATTERN
 
 # <statement> -> <identifier> = <expression> ;
 # <expression> -> <term> | <expression> + <term> | <expression> - <term>
@@ -20,6 +20,7 @@ class Syntax:
     def get_next_token(self):
         if self.current_index < len(self.tokens):
             self.current_token = self.tokens[self.current_index]
+            # print(f"Current token: {self.current_token.type} ('{self.current_token.lexeme}') at position {self.current_token.pos}")
             self.current_index += 1
         else: self.current_token = None
     
@@ -33,82 +34,84 @@ class Syntax:
         return True
     
     def expect(self, expected_type: str, expected_lexeme: str = None) -> bool:
-        if not self.match(expected_type, expected_lexeme):
-            if self.current_token is None and expected_lexeme == ';' and expected_type == 'STATEMENT_TERMINATOR':
-                print(f"SyntaxError at end of input: "
-                    f"Unexpected end of input: Missing '{expected_lexeme}'")
-                return False
-            elif self.current_token is None:
-                print(f"SyntaxError at end of input: "
-                f"Expected '{expected_lexeme}'")
-                return False
+        if self.match(expected_type, expected_lexeme):
+            self.get_next_token()
+            return True
+        else:
+            if self.current_token is None:
+                exp = f"'{expected_lexeme}'" if expected_lexeme else expected_type
+                print(f"SyntaxError at end of input: expected {exp} before end of input")
             else:
+                exp = f"'{expected_lexeme}'" if expected_lexeme else expected_type
                 print(f"SyntaxError at position {self.current_token.pos}: "
-                f"Expected '{expected_lexeme}' "
-                f"before '{self.current_token.lexeme}'")
-                return False
-        self.get_next_token()
-        return True
-
-    # <statement> -> <identifier> = <expression> ;
-    def parse_statement(self) -> bool:
-        if not self.expect('IDENTIFIER'):
+                        f"expected {exp} before '{self.current_token.lexeme}'")
             return False
-        if not self.expect('ASSIGNMENT', '='):
+        
+    def parse_statement(self) -> bool:
+        print("Parsing <statement>...")
+        if not self.expect("IDENTIFIER"):
+            return False
+        if not self.expect("ASSIGNMENT", "="):
             return False
         if not self.parse_expression():
             return False
-        if not self.expect('STATEMENT_TERMINATOR', ';'):
+        if self.current_index < len(self.tokens) and self.current_token is not None:
+            print(f"SyntaxError at position {self.current_token.pos}: "
+                    f"unexpected token '{self.current_token.lexeme}'")
             return False
+        if not self.expect("STATEMENT_TERMINATOR", ";"):
+            return False
+        print("Statement parsed successfully.")
         return True
 
-    # <expression> -> <term> | <expression> + <term> | <expression> - <term>
-    def parse_expression(self, in_parenthesis: bool = False) -> bool:
-        if not self.parse_term(in_parenthesis):
+    def parse_expression(self) -> bool:
+        print("Parsing <expression>...")
+        if not self.parse_term():
             return False
-        while self.match('OPERATOR', '+') or self.match('OPERATOR', '-'):
+
+        # Then check for + or - and recurse
+        while(self.match("OPERATOR", "+") or self.match("OPERATOR", "-")):
             self.get_next_token()
-            if not self.parse_term(in_parenthesis):
+            if not self.parse_term():
                 return False
         return True
 
-    # <term> -> <factor> | <term> * <factor> | <term> / <factor>
-    def parse_term(self, in_parenthesis: bool = False) -> bool:
+    def parse_term(self) -> bool:
+        print("Parsing <term>...")
         if not self.parse_factor():
             return False
-        while self.match('OPERATOR', '*') or self.match('OPERATOR', '/'):
-            if( in_parenthesis and self.current_token and self.current_token.lexeme in ('*', '/') ):
-                print(f"SyntaxError at position {self.current_token.pos}: "
-                    f"expected ')' before '{self.current_token.lexeme}'")
-                return False
+        # Then check for * or / and recurse
+        while(self.match("OPERATOR", "*") or self.match("OPERATOR", "/")):
             self.get_next_token()
             if not self.parse_factor():
                 return False
         return True
 
-    # <factor> -> <integer> | <identifier> | ( <expression> )
     def parse_factor(self) -> bool:
-        if self.match('NUMBER'):
+        print("Parsing <factor>...")
+        if self.match("NUMBER"):
             self.get_next_token()
             return True
-        elif self.match('IDENTIFIER'):
+        elif self.match("IDENTIFIER"):
             self.get_next_token()
             return True
-        elif self.match('PARENTHESIS', '('):
+        elif self.match("PARENTHESIS", "("):
             self.get_next_token()
-            if not self.parse_expression(in_parenthesis=True):
+            if not self.parse_expression():
                 return False
-            if not self.expect('PARENTHESIS', ')'):
+            if not self.expect("PARENTHESIS", ")"):
                 return False
             return True
         else:
-            if self.current_token is not None:
-                print(f"SyntaxError at position {self.current_token.pos}: "
-                    f"Unexpected token {self.current_token.type} ('{self.current_token.lexeme}') in factor")
+            if self.current_token is None:
+                print("SyntaxError at end of input: expected NUMBER, IDENTIFIER, or '('.")
             else:
-                print(f"SyntaxError at end of input: Unexpected end of input in factor")
-            self.get_next_token()
+                if self.current_token.type == "PARENTHESIS" and self.current_token.lexeme == ")":
+                    print(f"SyntaxError at position {self.current_token.pos}: unexpected ')'")
+                else:
+                    print(f"SyntaxError at position {self.current_token.pos}: expected NUMBER, "
+                            f"IDENTIFIER, or '(', found '{self.current_token.lexeme}'")
             return False
-
+    
     def parse(self) -> bool:
         return self.parse_statement()
