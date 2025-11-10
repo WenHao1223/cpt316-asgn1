@@ -1,4 +1,5 @@
 from lexer.lexer_module import Lexer, PATTERN
+from .syntax_tree_module import SyntaxTree
 
 # <statement> -> <identifier> = <expression> ;
 # <expression> -> <term> | <expression> + <term> | <expression> - <term>
@@ -6,7 +7,6 @@ from lexer.lexer_module import Lexer, PATTERN
 # <factor> -> <integer> | <identifier> | ( <expression> )
 
 class Syntax:
-    
     def __init__(self, lexer: Lexer):
         self.lexer = lexer
         # Check any invalid tokens before parsing
@@ -55,57 +55,87 @@ class Syntax:
     # Parse <statement>
     def parse_statement(self) -> bool:
         print("Parsing <statement>...")
-        if not self.expect("IDENTIFIER"):
-            return False
+        if not self.match("IDENTIFIER"):
+            return None
+        id_token = self.current_token
+        self.get_next_token()
         if not self.expect("ASSIGNMENT", "="):
-            return False
-        if not self.parse_expression():
-            return False
+            return None
+        expr_tree = self.parse_expression()
+        if not expr_tree:
+            return None
         if not self.expect("STATEMENT_TERMINATOR", ";"):
-            return False
+            return None
         print("Statement parsed successfully.")
-        return True
+        return SyntaxTree("<statement>", None, [
+            SyntaxTree("identifier", id_token.lexeme),
+            SyntaxTree("assignment", "="),
+            expr_tree,
+            SyntaxTree("statement_terminator", ";"),
+        ])
 
     # Parse <expression>
     def parse_expression(self) -> bool:
         print("Parsing <expression>...")
-        if not self.parse_term():
-            return False
-        # Then check for + or - and recurse
-        while(self.match("OPERATOR", "+") or self.match("OPERATOR", "-")):
+        term_tree = self.parse_term()
+        if not term_tree:
+            return None
+        children = [term_tree]
+        while self.match("OPERATOR", "+") or self.match("OPERATOR", "-"):
+            op_token = self.current_token
             self.get_next_token()
-            if not self.parse_term():
-                return False
-        return True
+            next_term = self.parse_term()
+            if not next_term:
+                return None
+            children.append(SyntaxTree("operator", op_token.lexeme))
+            children.append(next_term)
+        return SyntaxTree("<expression>", None, children)
 
     # Parse <term>
     def parse_term(self) -> bool:
         print("Parsing <term>...")
-        if not self.parse_factor():
-            return False
-        # Then check for * or / and recurse
-        while(self.match("OPERATOR", "*") or self.match("OPERATOR", "/")):
+        factor_tree = self.parse_factor()
+        if not factor_tree:
+            return None
+        children = [factor_tree]
+        while self.match("OPERATOR", "*") or self.match("OPERATOR", "/"):
+            op_token = self.current_token
             self.get_next_token()
-            if not self.parse_factor():
-                return False
-        return True
+            next_factor = self.parse_factor()
+            if not next_factor:
+                return None
+            children.append(SyntaxTree("operator", op_token.lexeme))
+            children.append(next_factor)
+        return SyntaxTree("<term>", None, children)
 
     # Parse <factor>
     def parse_factor(self) -> bool:
         print("Parsing <factor>...")
+        node = None
         if self.match("NUMBER"):
+            num_token = self.current_token
             self.get_next_token()
-            return True
+            return SyntaxTree("<factor>", None, [SyntaxTree("number", num_token.lexeme)])
         elif self.match("IDENTIFIER"):
+            id_token = self.current_token
             self.get_next_token()
-            return True
+            return SyntaxTree("<factor>", None, [SyntaxTree("identifier", id_token.lexeme)])
         elif self.match("PARENTHESIS", "("):
+            left_paren_token = self.current_token
             self.get_next_token()
-            if not self.parse_expression():
-                return False
-            if not self.expect("PARENTHESIS", ")"):
-                return False
-            return True
+            expr_tree = self.parse_expression()
+            if not expr_tree:
+                return None
+            if not self.match("PARENTHESIS", ")"):
+                return None
+            right_paren_token = self.current_token
+            self.get_next_token()
+            node = SyntaxTree("<factor>", None, [
+                SyntaxTree("parenthesis", left_paren_token.lexeme),
+                expr_tree,
+                SyntaxTree("parenthesis", right_paren_token.lexeme)
+            ])
+            return node
         else:
             if self.current_token is None:
                 print("SyntaxError at end of input: expected NUMBER, IDENTIFIER, or '('.")
@@ -115,8 +145,14 @@ class Syntax:
                 else:
                     print(f"SyntaxError at position {self.current_token.pos}: expected NUMBER, "
                             f"IDENTIFIER, or '(', found '{self.current_token.lexeme}'")
-            return False
+            return None
     
     # Main parse function
     def parse(self) -> bool:
-        return self.parse_statement()
+        tree = self.parse_statement()
+
+        print()
+
+        if tree:
+            print(tree)
+        return tree
