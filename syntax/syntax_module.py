@@ -1,5 +1,6 @@
 from lexer.lexer_module import Lexer, PATTERN
 from .syntax_tree_module import SyntaxTree
+from .syntax_tree_export_module import export_syntax_tree_png
 
 # Grammar Rules:
 # <statement> -> <identifier> = <expression> ;
@@ -155,6 +156,7 @@ class Syntax:
         if tree:
             print("\nSyntax Tree:")
             print(tree)
+            export_syntax_tree_png(tree, "output/syntax_tree.png")
             return tree
         else:
             print("Parsing failed due to syntax errors.")
