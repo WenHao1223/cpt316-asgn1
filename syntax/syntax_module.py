@@ -1,5 +1,5 @@
 from lexer.lexer_module import Lexer
-from .parse_tree_module import ParseTree
+from .tree_module import ParseTree, parse_tree_to_syntax_tree
 from .export_tree_module import export_tree_png
 
 # Grammar Rules:
@@ -151,21 +151,21 @@ class Syntax:
     
     # Main parse function
     def parse(self) -> bool:
-        # syntaxTree, parseTree = self.parse_statement()
         parseTree = self.parse_statement()
+        syntaxTree = parse_tree_to_syntax_tree(parseTree) if parseTree else None
 
-        # if syntaxTree and parseTree:
-        if parseTree:
-            # print("\nSyntax Tree:")
-            # print(syntaxTree)
-            # export_tree_png(syntaxTree, "output/syntax_tree.png")
+        if syntaxTree and parseTree:
+        # if parseTree:
+            print("\nSyntax Tree:")
+            print(syntaxTree)
+            export_tree_png(syntaxTree, "output/syntax_tree.png")
 
             print("\nParse Tree:")
             print(parseTree)
             export_tree_png(parseTree, "output/parse_tree.png")
 
-            # return syntaxTree, parseTree
-            return parseTree
+            return syntaxTree, parseTree
+            # return parseTree
         else:
             print("Parsing failed due to syntax errors.")
             return None
