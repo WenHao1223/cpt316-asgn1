@@ -17,12 +17,14 @@ class Syntax:
         self.current_token = None
         self.get_next_token()
 
+    # Helper function to advance to the next token
     def get_next_token(self):
         if self.current_index < len(self.tokens):
             self.current_token = self.tokens[self.current_index]
             self.current_index += 1
         else: self.current_token = None
     
+    # Helper function to check if the current token matches expected type and lexeme
     def match(self, expected_type: str, expected_lexeme: str = None) -> bool:
         if self.current_token is None:
             return False
@@ -32,6 +34,7 @@ class Syntax:
             return False
         return True
     
+    # Helper function to expect a token of a certain type and lexeme, advancing if matched
     def expect(self, expected_type: str, expected_lexeme: str = None) -> bool:
         if self.match(expected_type, expected_lexeme):
             self.get_next_token()
@@ -48,7 +51,8 @@ class Syntax:
                 print(f"SyntaxError at position {self.current_token.pos}: "
                         f"expected {exp} before '{self.current_token.lexeme}'")
             return False
-        
+    
+    # Parse <statement>
     def parse_statement(self) -> bool:
         print("Parsing <statement>...")
         if not self.expect("IDENTIFIER"):
@@ -62,6 +66,7 @@ class Syntax:
         print("Statement parsed successfully.")
         return True
 
+    # Parse <expression>
     def parse_expression(self) -> bool:
         print("Parsing <expression>...")
         if not self.parse_term():
@@ -73,6 +78,7 @@ class Syntax:
                 return False
         return True
 
+    # Parse <term>
     def parse_term(self) -> bool:
         print("Parsing <term>...")
         if not self.parse_factor():
@@ -84,6 +90,7 @@ class Syntax:
                 return False
         return True
 
+    # Parse <factor>
     def parse_factor(self) -> bool:
         print("Parsing <factor>...")
         if self.match("NUMBER"):
@@ -110,5 +117,6 @@ class Syntax:
                             f"IDENTIFIER, or '(', found '{self.current_token.lexeme}'")
             return False
     
+    # Main parse function
     def parse(self) -> bool:
         return self.parse_statement()
