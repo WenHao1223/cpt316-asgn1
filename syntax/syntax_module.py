@@ -1,4 +1,4 @@
-from lexer.lexer_module import Lexer, PATTERN
+from lexer.lexer_module import Lexer
 from .syntax_tree_module import SyntaxTree
 from .syntax_tree_export_module import export_syntax_tree_png
 

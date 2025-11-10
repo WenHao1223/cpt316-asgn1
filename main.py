@@ -29,4 +29,3 @@ if __name__ == "__main__":
 
     parser = Syntax(lexer)
     tree = parser.parse()
-    # print_tree(tree)
