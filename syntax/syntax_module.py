@@ -6,7 +6,7 @@ from lexer.lexer_module import Lexer, PATTERN
 # <factor> -> <integer> | <identifier> | ( <expression> )
 
 class Syntax:
-
+    
     def __init__(self, lexer: Lexer):
         self.lexer = lexer
         # Check any invalid tokens before parsing
@@ -20,7 +20,6 @@ class Syntax:
     def get_next_token(self):
         if self.current_index < len(self.tokens):
             self.current_token = self.tokens[self.current_index]
-            # print(f"Current token: {self.current_token.type} ('{self.current_token.lexeme}') at position {self.current_token.pos}")
             self.current_index += 1
         else: self.current_token = None
     
@@ -41,6 +40,9 @@ class Syntax:
             if self.current_token is None:
                 exp = f"'{expected_lexeme}'" if expected_lexeme else expected_type
                 print(f"SyntaxError at end of input: expected {exp} before end of input")
+            elif expected_type == "STATEMENT_TERMINATOR" and expected_lexeme == ";":
+                print(f"SyntaxError at position {self.current_token.pos}: "
+                    f"unexpected token '{self.current_token.lexeme}'")
             else:
                 exp = f"'{expected_lexeme}'" if expected_lexeme else expected_type
                 print(f"SyntaxError at position {self.current_token.pos}: "
@@ -55,10 +57,6 @@ class Syntax:
             return False
         if not self.parse_expression():
             return False
-        if self.current_index < len(self.tokens) and self.current_token is not None:
-            print(f"SyntaxError at position {self.current_token.pos}: "
-                    f"unexpected token '{self.current_token.lexeme}'")
-            return False
         if not self.expect("STATEMENT_TERMINATOR", ";"):
             return False
         print("Statement parsed successfully.")
@@ -68,7 +66,6 @@ class Syntax:
         print("Parsing <expression>...")
         if not self.parse_term():
             return False
-
         # Then check for + or - and recurse
         while(self.match("OPERATOR", "+") or self.match("OPERATOR", "-")):
             self.get_next_token()
