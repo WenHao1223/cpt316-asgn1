@@ -151,8 +151,8 @@ class Syntax:
     def parse(self) -> bool:
         tree = self.parse_statement()
 
-        print()
-
         if tree:
+            print("\nSyntax Tree:")
             print(tree)
+        
         return tree
