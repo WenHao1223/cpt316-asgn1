@@ -1,4 +1,5 @@
-# syntax_tree_export_module.py
+import os
+import shutil
 from PIL import Image, ImageDraw, ImageFont
 
 HSPACE = 24   # horizontal gap between siblings
@@ -7,18 +8,22 @@ PADDING = 24  # image padding
 TXTPAD = 10   # padding inside a node box
 FONTSIZE = 16
 
+# Compute text size for a given font
 def _text_size(text, font):
     # width, height via bbox
     l, t, r, b = font.getbbox(text)
     return (r - l), (b - t)
 
+# Get node label
 def _node_label(node):
     return f"{node.node_type}: {node.value}" if node.value is not None else node.node_type
 
+# Get node box size
 def _node_box_size(node, font):
     tw, th = _text_size(_node_label(node), font)
     return tw + 2 * TXTPAD, th + 2 * TXTPAD
 
+# Get subtree size
 def _subtree_size(node, font):
     """Returns (width, height) needed for the whole subtree rooted at node."""
     nw, nh = _node_box_size(node, font)
@@ -30,6 +35,7 @@ def _subtree_size(node, font):
     total_h = nh + VSPACE + max(h for _, h in child_sizes)
     return total_w, total_h
 
+# Draw subtree
 def _draw_subtree(draw, node, x_center, y_top, font):
     """Draw node centered at x_center, top at y_top; return center x of this node."""
     label = _node_label(node)
@@ -69,6 +75,14 @@ def _draw_subtree(draw, node, x_center, y_top, font):
 
     return x_center
 
+# Clear export folder
+def clear_export_folder():
+    export_folder = "output"
+    if os.path.exists(export_folder):
+        shutil.rmtree(export_folder)
+    os.makedirs(export_folder)
+
+# Export tree as PNG
 def export_tree_png(tree, filename):
     # font
     try:
@@ -90,4 +104,4 @@ def export_tree_png(tree, filename):
     _draw_subtree(draw, tree, root_center_x, root_top_y, font)
 
     img.save(filename)
-    print(f"Saved PNG: {filename}")
+    print(f"Saved PNG: {filename}\n")

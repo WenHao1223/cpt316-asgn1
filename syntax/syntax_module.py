@@ -1,6 +1,6 @@
 from lexer.lexer_module import Lexer
 from .tree_module import ParseTree, parse_tree_to_syntax_tree
-from .export_tree_module import export_tree_png
+from .export_tree_module import export_tree_png, clear_export_folder
 
 # Grammar Rules:
 # <statement> -> <identifier> = <expression> ;
@@ -9,6 +9,30 @@ from .export_tree_module import export_tree_png
 # <factor> -> <integer> | <identifier> | ( <expression> )
 
 class Syntax:
+    def parse_all_statements(self):
+        def process_statement(tokens):
+            statement_source = ' '.join(t.lexeme for t in tokens)
+            print(f'Processing statement "{statement_source}"...')
+            temp_lexer = type(self.lexer)("")
+            temp_lexer.tokens = tokens.copy()
+            temp_lexer.invalids = []
+            parser = Syntax(temp_lexer)
+            return parser.parse_statement()
+
+        statements = []
+        statement_tokens = []
+        for token in self.tokens:
+            statement_tokens.append(token)
+            if token.type == "STATEMENT_TERMINATOR" and token.lexeme == ";":
+                parse_tree = process_statement(statement_tokens)
+                statements.append(parse_tree)
+                statement_tokens = []
+        # After loop, check for leftover tokens (missing semicolon)
+        if statement_tokens:
+            parse_tree = process_statement(statement_tokens)
+            statements.append(parse_tree)
+        return statements
+
     def __init__(self, lexer: Lexer):
         self.lexer = lexer
         # Check any invalid tokens before parsing
@@ -68,7 +92,7 @@ class Syntax:
             return None
         if not self.expect("STATEMENT_TERMINATOR", ";"):
             return None
-        print("Statement parsed successfully.")
+        print("Statement parsed successfully.\n")
         return ParseTree("<statement>", None, [
             ParseTree("identifier", id_token.lexeme),
             ParseTree("assignment", "="),
@@ -150,22 +174,26 @@ class Syntax:
             return None
     
     # Main parse function
-    def parse(self) -> bool:
-        parseTree = self.parse_statement()
-        syntaxTree = parse_tree_to_syntax_tree(parseTree) if parseTree else None
+    def parse(self):
+        # Parse all statements and export each parse tree as line-N-parse-tree.png
+        all_parse_trees = self.parse_all_statements()
+        results = []
+        clear_export_folder()
+        for idx, parse_tree in enumerate(all_parse_trees):
+            if parse_tree:
+                # Export syntax tree as line-N-syntax-tree.png
+                syntax_tree = parse_tree_to_syntax_tree(parse_tree)
+                print(f"\nSyntax Tree (line {idx}):")
+                print(syntax_tree)
+                export_tree_png(syntax_tree, f"output/line-{idx}-syntax-tree.png")
 
-        if syntaxTree and parseTree:
-        # if parseTree:
-            print("\nSyntax Tree:")
-            print(syntaxTree)
-            export_tree_png(syntaxTree, "output/syntax_tree.png")
+                # Export parse tree as line-N-parse-tree.png
+                print(f"\nParse Tree (line {idx}):")
+                print(parse_tree)
+                export_tree_png(parse_tree, f"output/line-{idx}-parse-tree.png")
 
-            print("\nParse Tree:")
-            print(parseTree)
-            export_tree_png(parseTree, "output/parse_tree.png")
-
-            return syntaxTree, parseTree
-            # return parseTree
-        else:
-            print("Parsing failed due to syntax errors.")
-            return None
+                results.append((syntax_tree, parse_tree))
+            else:
+                print(f"Parsing failed for statement at line {idx}.")
+                results.append((None, None))
+        return results
