@@ -13,7 +13,7 @@ NODE_TYPE = [
     'statement_terminator',
 ]
 
-class SyntaxTree:
+class ParseTree:
     def __init__(self, node_type, value=None, children=None):
         self.node_type = node_type
         self.value = value
@@ -36,7 +36,7 @@ class SyntaxTree:
             raise ValueError(f"Invalid node value: {node_type}")
         
     def __repr__(self):
-        return f"SyntaxTree(node_type={self.node_type}, value={self.value}, children={self.children})"
+        return f"ParseTree(node_type={self.node_type}, value={self.value}, children={self.children})"
     
     # To print the tree in a readable format
     def __str__(self, prefix="", is_last=True, is_root=True):

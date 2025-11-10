@@ -12,7 +12,7 @@ from syntax.syntax_module import Syntax
 if __name__ == "__main__":
     # Get input line from user
     line = str(input("Enter a line of code to lex: "))
-    # line = "x = (3) + 4;"
+    # line = "x = (y + 3) * 2;"
 
     lexer = Lexer(line)
     tokens, invalids, counts = lexer.lex()

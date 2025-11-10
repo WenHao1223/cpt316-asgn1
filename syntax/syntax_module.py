@@ -1,6 +1,6 @@
 from lexer.lexer_module import Lexer
-from .syntax_tree_module import SyntaxTree
-from .syntax_tree_export_module import export_syntax_tree_png
+from .parse_tree_module import ParseTree
+from .export_tree_module import export_tree_png
 
 # Grammar Rules:
 # <statement> -> <identifier> = <expression> ;
@@ -69,11 +69,11 @@ class Syntax:
         if not self.expect("STATEMENT_TERMINATOR", ";"):
             return None
         print("Statement parsed successfully.")
-        return SyntaxTree("<statement>", None, [
-            SyntaxTree("identifier", id_token.lexeme),
-            SyntaxTree("assignment", "="),
+        return ParseTree("<statement>", None, [
+            ParseTree("identifier", id_token.lexeme),
+            ParseTree("assignment", "="),
             expr_tree,
-            SyntaxTree("statement_terminator", ";"),
+            ParseTree("statement_terminator", ";"),
         ])
 
     # Parse <expression>
@@ -89,9 +89,9 @@ class Syntax:
             next_term = self.parse_term()
             if not next_term:
                 return None
-            children.append(SyntaxTree("operator", op_token.lexeme))
+            children.append(ParseTree("operator", op_token.lexeme))
             children.append(next_term)
-        return SyntaxTree("<expression>", None, children)
+        return ParseTree("<expression>", None, children)
 
     # Parse <term>
     def parse_term(self) -> bool:
@@ -106,9 +106,9 @@ class Syntax:
             next_factor = self.parse_factor()
             if not next_factor:
                 return None
-            children.append(SyntaxTree("operator", op_token.lexeme))
+            children.append(ParseTree("operator", op_token.lexeme))
             children.append(next_factor)
-        return SyntaxTree("<term>", None, children)
+        return ParseTree("<term>", None, children)
 
     # Parse <factor>
     def parse_factor(self) -> bool:
@@ -117,11 +117,11 @@ class Syntax:
         if self.match("NUMBER"):
             num_token = self.current_token
             self.get_next_token()
-            return SyntaxTree("<factor>", None, [SyntaxTree("number", num_token.lexeme)])
+            return ParseTree("<factor>", None, [ParseTree("number", num_token.lexeme)])
         elif self.match("IDENTIFIER"):
             id_token = self.current_token
             self.get_next_token()
-            return SyntaxTree("<factor>", None, [SyntaxTree("identifier", id_token.lexeme)])
+            return ParseTree("<factor>", None, [ParseTree("identifier", id_token.lexeme)])
         elif self.match("PARENTHESIS", "("):
             left_paren_token = self.current_token
             self.get_next_token()
@@ -132,10 +132,10 @@ class Syntax:
                 return None
             right_paren_token = self.current_token
             self.get_next_token()
-            node = SyntaxTree("<factor>", None, [
-                SyntaxTree("parenthesis", left_paren_token.lexeme),
+            node = ParseTree("<factor>", None, [
+                ParseTree("parenthesis", left_paren_token.lexeme),
                 expr_tree,
-                SyntaxTree("parenthesis", right_paren_token.lexeme)
+                ParseTree("parenthesis", right_paren_token.lexeme)
             ])
             return node
         else:
@@ -151,13 +151,21 @@ class Syntax:
     
     # Main parse function
     def parse(self) -> bool:
-        tree = self.parse_statement()
+        # syntaxTree, parseTree = self.parse_statement()
+        parseTree = self.parse_statement()
 
-        if tree:
-            print("\nSyntax Tree:")
-            print(tree)
-            export_syntax_tree_png(tree, "output/syntax_tree.png")
-            return tree
+        # if syntaxTree and parseTree:
+        if parseTree:
+            # print("\nSyntax Tree:")
+            # print(syntaxTree)
+            # export_tree_png(syntaxTree, "output/syntax_tree.png")
+
+            print("\nParse Tree:")
+            print(parseTree)
+            export_tree_png(parseTree, "output/parse_tree.png")
+
+            # return syntaxTree, parseTree
+            return parseTree
         else:
             print("Parsing failed due to syntax errors.")
             return None

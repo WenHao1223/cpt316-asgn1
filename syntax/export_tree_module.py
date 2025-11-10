@@ -69,7 +69,7 @@ def _draw_subtree(draw, node, x_center, y_top, font):
 
     return x_center
 
-def export_syntax_tree_png(tree, filename="syntax_tree.png"):
+def export_tree_png(tree, filename):
     # font
     try:
         font = ImageFont.truetype("consola.ttf", FONTSIZE)  # Consolas if available
