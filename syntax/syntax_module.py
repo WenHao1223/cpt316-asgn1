@@ -1,6 +1,7 @@
 from lexer.lexer_module import Lexer, PATTERN
 from .syntax_tree_module import SyntaxTree
 
+# Grammar Rules:
 # <statement> -> <identifier> = <expression> ;
 # <expression> -> <term> | <expression> + <term> | <expression> - <term>
 # <term> -> <factor> | <term> * <factor> | <term> / <factor>
@@ -154,5 +155,7 @@ class Syntax:
         if tree:
             print("\nSyntax Tree:")
             print(tree)
-        
-        return tree
+            return tree
+        else:
+            print("Parsing failed due to syntax errors.")
+            return None
