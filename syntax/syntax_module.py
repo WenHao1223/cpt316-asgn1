@@ -101,38 +101,55 @@ class Syntax:
         ])
 
     # Parse <expression>
-    def parse_expression(self) -> bool:
+    def parse_expression(self, left_expr=None):
         print("Parsing <expression>...")
-        term_tree = self.parse_term()
-        if not term_tree:
-            return None
-        children = [term_tree]
-        while self.match("OPERATOR", "+") or self.match("OPERATOR", "-"):
+
+        if left_expr is None:
+            left_term = self.parse_term()
+            if not left_term:
+                return None
+            left_expr = ParseTree("<expression>", None, [left_term])
+
+        if self.match("OPERATOR", "+") or self.match("OPERATOR", "-"):
             op_token = self.current_token
             self.get_next_token()
-            next_term = self.parse_term()
-            if not next_term:
+
+            right_term = self.parse_term()
+            if not right_term:
                 return None
-            children.append(ParseTree("operator", op_token.lexeme))
-            children.append(next_term)
-        return ParseTree("<expression>", None, children)
+            new_expr = ParseTree("<expression>", None, [
+                left_expr,
+                ParseTree("operator", op_token.lexeme),
+                right_term
+            ])
+            return self.parse_expression(new_expr)
+        return left_expr
 
     # Parse <term>
-    def parse_term(self) -> bool:
+    def parse_term(self, left_term=None):
         print("Parsing <term>...")
-        factor_tree = self.parse_factor()
-        if not factor_tree:
-            return None
-        children = [factor_tree]
-        while self.match("OPERATOR", "*") or self.match("OPERATOR", "/"):
+
+        if left_term is None:
+            left_factor = self.parse_factor()
+            if not left_factor:
+                return None
+            left_term = ParseTree("<term>", None, [left_factor])
+
+        if self.match("OPERATOR", "*") or self.match("OPERATOR", "/"):
             op_token = self.current_token
             self.get_next_token()
-            next_factor = self.parse_factor()
-            if not next_factor:
+
+            right_factor = self.parse_factor()
+            if not right_factor:
                 return None
-            children.append(ParseTree("operator", op_token.lexeme))
-            children.append(next_factor)
-        return ParseTree("<term>", None, children)
+
+            new_term = ParseTree("<term>", None, [
+                left_term,
+                ParseTree("operator", op_token.lexeme),
+                right_factor
+            ])
+            return self.parse_term(new_term)
+        return left_term
 
     # Parse <factor>
     def parse_factor(self) -> bool:
