@@ -9,30 +9,6 @@ from .export_tree_module import export_tree_png, clear_export_folder
 # <factor> -> <integer> | <identifier> | ( <expression> )
 
 class Syntax:
-    def parse_all_statements(self):
-        def process_statement(tokens):
-            statement_source = ' '.join(t.lexeme for t in tokens)
-            print(f'Processing statement "{statement_source}"...')
-            temp_lexer = type(self.lexer)("")
-            temp_lexer.tokens = tokens.copy()
-            temp_lexer.invalids = []
-            parser = Syntax(temp_lexer)
-            return parser.parse_statement()
-
-        statements = []
-        statement_tokens = []
-        for token in self.tokens:
-            statement_tokens.append(token)
-            if token.type == "STATEMENT_TERMINATOR" and token.lexeme == ";":
-                parse_tree = process_statement(statement_tokens)
-                statements.append(parse_tree)
-                statement_tokens = []
-        # After loop, check for leftover tokens (missing semicolon)
-        if statement_tokens:
-            parse_tree = process_statement(statement_tokens)
-            statements.append(parse_tree)
-        return statements
-
     def __init__(self, lexer: Lexer):
         self.lexer = lexer
         # Check any invalid tokens before parsing
@@ -189,6 +165,30 @@ class Syntax:
                     print(f"SyntaxError at position {self.current_token.pos}: expected NUMBER, "
                             f"IDENTIFIER, or '(', found '{self.current_token.lexeme}'")
             return None
+    
+    def parse_all_statements(self):
+        def process_statement(tokens):
+            statement_source = ' '.join(t.lexeme for t in tokens)
+            print(f'Processing statement "{statement_source}"...')
+            temp_lexer = type(self.lexer)("")
+            temp_lexer.tokens = tokens.copy()
+            temp_lexer.invalids = []
+            parser = Syntax(temp_lexer)
+            return parser.parse_statement()
+
+        statements = []
+        statement_tokens = []
+        for token in self.tokens:
+            statement_tokens.append(token)
+            if token.type == "STATEMENT_TERMINATOR" and token.lexeme == ";":
+                parse_tree = process_statement(statement_tokens)
+                statements.append(parse_tree)
+                statement_tokens = []
+        # After loop, check for leftover tokens (missing semicolon)
+        if statement_tokens:
+            parse_tree = process_statement(statement_tokens)
+            statements.append(parse_tree)
+        return statements
     
     # Main parse function
     def parse(self):
