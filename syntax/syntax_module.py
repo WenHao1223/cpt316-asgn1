@@ -57,10 +57,9 @@ class Syntax:
     # Parse <statement>
     def parse_statement(self) -> bool:
         print("Parsing <statement>...")
-        if not self.match("IDENTIFIER"):
+        if not self.expect("IDENTIFIER"):
             return None
         id_token = self.current_token
-        self.get_next_token()
         if not self.expect("ASSIGNMENT", "="):
             return None
         expr_tree = self.parse_expression()
@@ -145,7 +144,7 @@ class Syntax:
             expr_tree = self.parse_expression()
             if not expr_tree:
                 return None
-            if not self.match("PARENTHESIS", ")"):
+            if not self.expect("PARENTHESIS", ")"):
                 return None
             right_paren_token = self.current_token
             self.get_next_token()
