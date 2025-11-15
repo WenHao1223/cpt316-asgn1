@@ -57,9 +57,12 @@ class Syntax:
     # Parse <statement>
     def parse_statement(self) -> bool:
         print("Parsing <statement>...")
-        if not self.expect("IDENTIFIER"):
+        if not self.match("IDENTIFIER"):
+            print(f"SyntaxError at position {self.current_token.pos}: expected IDENTIFIER "
+                    f"before '{self.current_token.lexeme}'")
             return None
         id_token = self.current_token
+        self.get_next_token()
         if not self.expect("ASSIGNMENT", "="):
             return None
         expr_tree = self.parse_expression()
