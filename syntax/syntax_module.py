@@ -148,6 +148,10 @@ class Syntax:
             if not expr_tree:
                 return None
             if not self.match("PARENTHESIS", ")"):
+                if self.current_token:
+                    print(f"SyntaxError at position {self.current_token.pos}: expected ')', found '{self.current_token.lexeme}'")
+                else:
+                    print("SyntaxError at end of input: expected ')'")
                 return None
             right_paren_token = self.current_token
             self.get_next_token()
