@@ -14,6 +14,7 @@ class Syntax:
         # Check any invalid tokens before parsing
         if lexer.invalids:
             print("Cannot parse input with lexical errors.")
+            self.tokens = []
             return
         self.tokens = lexer.tokens
         self.current_index = 0 
