@@ -13,7 +13,8 @@ class Syntax:
         self.lexer = lexer
         # Check any invalid tokens before parsing
         if lexer.invalids:
-            raise ValueError("Cannot parse input with lexical errors.")
+            print("Cannot parse input with lexical errors.")
+            return
         self.tokens = lexer.tokens
         self.current_index = 0 
         self.current_token = None
