@@ -33,11 +33,14 @@ class Lexer:
     # Scan identifiers
     def scan_identifier(self):
         start = self.position
-        while (self.position < self.length and 
-            IDENT_RE.match(self.source, self.position)):
+        match = IDENT_RE.match(self.source, self.position)
+        if match:
+            lexeme = match.group()
+            self.tokens.append(Token('IDENTIFIER', lexeme, start))
+            self.position += len(lexeme)
+        else:
+            self.tokens.append(Token('IDENTIFIER', self.source[self.position], start))
             self.position += 1
-        lexeme = self.source[start:self.position]
-        self.tokens.append(Token('IDENTIFIER', lexeme, start))
 
     # Scan numbers
     def scan_number(self):
